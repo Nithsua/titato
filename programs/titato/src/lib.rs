@@ -35,7 +35,13 @@ pub struct Play<'info> {
 
 #[derive(Accounts)]
 pub struct SetupGame<'info> {
-    #[account(init, payer=player_one)]
+    /*
+    In addition to the game's size, we have to add another 8 to the space.
+    This is space for the discriminator which anchor sets automatically.
+    In short, the discriminator is how anchor can differentiate between
+    different accounts of the same program.
+    */
+    #[account(init, payer=player_one, space = Game::MAXIMUM_SIZE + 8)]
     pub game: Account<'info, Game>,
     #[account(mut)]
     pub player_one: Signer<'info>,
@@ -52,6 +58,7 @@ pub struct Game {
 }
 
 impl Game {
+    const MAXIMUM_SIZE: usize = 116;
     pub fn is_active(&self) -> bool {
         self.state == GameState::Active
     }
