@@ -6,7 +6,10 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 #[program]
 pub mod titato {
     use super::*;
-    pub fn initialize(ctx: Context<SetupGame>) -> ProgramResult {
+    pub fn setup_game(ctx: Context<SetupGame>, player_two: Pubkey) -> ProgramResult {
+        let game = &mut ctx.accounts.game;
+        game.players = [ctx.accounts.player_one.key(), player_two];
+        game.turn = 1;
         Ok(())
     }
 }

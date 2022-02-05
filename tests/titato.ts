@@ -1,6 +1,7 @@
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
 import { Titato } from '../target/types/titato';
+import { expect } from 'chai';
 
 describe('titato', () => {
 
@@ -9,9 +10,16 @@ describe('titato', () => {
 
   const program = anchor.workspace.Titato as Program<Titato>;
 
-  it('Is initialized!', async () => {
-    // Add your test here.
-    const tx = await program.rpc.initialize({});
-    console.log("Your transaction signature", tx);
+  it('setup game', async () => { 
+    const gameKeypair = anchor.web3.Keypair.generate();
+    const playerOne = program.provider.wallet;
+    const playerTwo = anchor.web3.Keypair.generate();
+    await program.rpc.setupGame(playerTwo.publicKey, { accounts: { game: gameKeypair.publicKey, playerOne: playerOne.publicKey, systemProgram: anchor.web3.SystemProgram.programId }, signers: [gameKeypair] })
+    
+    let gameState = await program.account.game.fetch(gameKeypair.publicKey);
+    expect(gameState.turn).to.equal(1);
+    expect(gameState.players).to.eql([playerOne.publicKey, playerTwo.publicKey]);
+    expect(gameState.state).to.eql({ active: {} });
+    expect(gameState.board).to.eql([[null, null, null,], [null, null, null,], [null, null, null,]]);
   });
 });
